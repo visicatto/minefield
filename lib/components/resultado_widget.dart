@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ResultadoWidget extends StatelessWidget implements PreferredSizeWidget {
-  const ResultadoWidget({
-    Key? key,
-    required this.venceu,
-    required this.onRestart,
-  }) : super(key: key);
   final bool? venceu;
-  final Function()? onRestart;
+  final Function()? onReiniciar;
+
+  const ResultadoWidget({
+    required this.venceu,
+    required this.onReiniciar,
+    Key? key,
+  }) : super(key: key);
 
   Color _getCor() {
     if (venceu == null) {
@@ -40,12 +41,12 @@ class ResultadoWidget extends StatelessWidget implements PreferredSizeWidget {
             backgroundColor: _getCor(),
             child: IconButton(
               padding: const EdgeInsets.all(0),
-              onPressed: onRestart,
               icon: Icon(
                 _getIcon(),
                 color: Colors.black,
                 size: 35,
               ),
+              onPressed: onReiniciar,
             ),
           ),
         ),

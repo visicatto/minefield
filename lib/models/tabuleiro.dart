@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:flutter/foundation.dart';
+
 import 'campo.dart';
 
 class Tabuleiro {
@@ -20,17 +20,21 @@ class Tabuleiro {
   }
 
   void reiniciar() {
-    _campos.forEach((c) => c.reiniciar());
+    for (var c in _campos) {
+      c.reiniciar();
+    }
     _sortearMinas();
   }
 
   void revelarBombas() {
-    _campos.forEach((c) => c.revelarBombas());
+    for (var c in _campos) {
+      c.revelarBomba();
+    }
   }
 
   void _criarCampos() {
-    for (var l = 0; l < linhas; l++) {
-      for (var c = 0; c < linhas; c++) {
+    for (int l = 0; l < linhas; l++) {
+      for (int c = 0; c < linhas; c++) {
         _campos.add(Campo(linha: l, coluna: c));
       }
     }
@@ -39,7 +43,7 @@ class Tabuleiro {
   void _relacionarVizinhos() {
     for (var campo in _campos) {
       for (var vizinho in _campos) {
-        campo.addNeighbors(vizinho);
+        campo.adicionarVizinho(vizinho);
       }
     }
   }
@@ -54,7 +58,7 @@ class Tabuleiro {
     while (sorteadas < qtdeBombas) {
       int i = Random().nextInt(_campos.length);
 
-      if (_campos[i].minado) {
+      if (!_campos[i].minado) {
         sorteadas++;
         _campos[i].minar();
       }

@@ -1,32 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:minefield/models/explosao_exception.dart';
+import 'package:minefield/models/tabuleiro.dart';
 import '../components/resultado_widget.dart';
-import '../components/campo_widget.dart';
+import '../components/tabuleiro_widget.dart';
 import '../models/campo.dart';
 
-class CampoMinadoApp extends StatelessWidget {
+class CampoMinadoApp extends StatefulWidget {
   const CampoMinadoApp({Key? key}) : super(key: key);
 
-  void _reiniciar() {}
+  @override
+  State<CampoMinadoApp> createState() => _CampoMinadoAppState();
+}
 
-  void _abrir(Campo campo) {}
+class _CampoMinadoAppState extends State<CampoMinadoApp> {
+  bool? _venceu;
+  Tabuleiro? _tabuleiro;
 
-  void _alterarMarcacao(Campo campo) {}
+  void _reiniciar() {
+    setState(() {
+      _venceu = null;
+      _tabuleiro!.reiniciar();
+    });
+  }
+
+  void _abrir(Campo campo) {
+    if (_venceu != null) {
+      return;
+    }
+
+    setState(() {
+      try {
+        campo.abrir();
+        if (_tabuleiro!.resolvido) {
+          _venceu = true;
+        }
+      } on ExplosaoException {
+        _venceu = false;
+        _tabuleiro!.revelarBombas();
+      }
+    });
+  }
+
+  void _alternarMarcacao(Campo campo) {
+    if (_venceu != null) {
+      return;
+    }
+
+    setState(() {
+      campo.alternarMarcacao();
+      if (_tabuleiro!.resolvido) {
+        _venceu = true;
+      }
+    });
+  }
+
+  Tabuleiro _getTabuleiro(double largura, double altura) {
+    if (_tabuleiro == null) {
+      int qtdeColunas = 15;
+      double tamanhoCampo = largura / qtdeColunas;
+      int qtdeLinhas = (altura / tamanhoCampo).floor();
+
+      _tabuleiro = Tabuleiro(
+        linhas: qtdeLinhas,
+        colunas: qtdeColunas,
+        qtdeBombas: 80,
+      );
+    }
+    return _tabuleiro!;
+  }
 
   @override
   Widget build(BuildContext context) {
-    Campo campo = Campo(linha: 0, coluna: 0);
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: ResultadoWidget(
-          venceu: true,
-          onRestart: _reiniciar,
+          venceu: _venceu,
+          onReiniciar: _reiniciar,
         ),
         body: Container(
-            child: CampoWidget(
-          campo: campo,
-          onAbrir: _abrir,
-          onAlterarMarcacao: _alterarMarcacao,
-        )),
+          color: Colors.grey,
+          child: LayoutBuilder(
+            builder: (ctx, constraints) {
+              return TabuleiroWidget(
+                tabuleiro: _getTabuleiro(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                ),
+                onAbrir: _abrir,
+                onAlternarMarcacao: _alternarMarcacao,
+              );
+            },
+          ),
+        ),
       ),
     );
   }
